@@ -31,7 +31,10 @@ module.exports = (robot) ->
       text
 
   psysh.stdout.on 'data', (data) ->
-    psysh.send bold(data.toString()) if psysh.send?
+    output = data.toString().trim()
+    n = output.indexOf('\u23CE')
+    output = output.substring(0, n).trim() if n isnt -1
+    psysh.send bold(output) if psysh.send? and (output.charAt(0) not in [">", "=", "\u23CE"])
 
   psysh.stdin.on 'end', ->
     psysh.send underline('psysh ended')
@@ -43,5 +46,5 @@ module.exports = (robot) ->
 
   robot.respond /\? (.*)/i, (msg) ->
     psysh.send = (text) ->
-      msg.send text
+      msg.send text.trim() if text
     psysh.stdin.write "#{msg.match[1]}\n"
